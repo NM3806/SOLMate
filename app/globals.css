@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root {
+/* :root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -17,10 +17,47 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Wallet adapter overrides */
+/* .wallet-adapter-dropdown {
+  @apply w-full;
+}
+
+.wallet-adapter-button {
+  @apply !w-full !justify-center !rounded-lg !px-4 !py-3 !font-medium !text-sm;
+}
+
+.wallet-adapter-button-trigger {
+  @apply !bg-solana-purple hover:!bg-solana-purple/90 !text-white;
+}
+
+.wallet-adapter-modal-wrapper {
+  @apply !bg-gray-900/50 backdrop-blur-sm;
+}
+
+.wallet-adapter-modal-container {
+  @apply !bg-white !rounded-xl !p-6;
+}
+
+.wallet-adapter-modal-title {
+  @apply !text-gray-900 !font-bold !text-lg !mb-4;
+}
+
+.wallet-adapter-modal-list {
+  @apply !mt-0 !mb-4 !p-0 !gap-2;
+}
+
+.wallet-adapter-modal-list-item {
+  @apply !bg-white hover:!bg-gray-50 !border !border-gray-200 !rounded-lg !p-3;
+}
+
+.wallet-adapter-modal-list-more {
+  @apply !hidden;
+} */
