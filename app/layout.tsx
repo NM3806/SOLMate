@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import '@solana/wallet-adapter-react-ui/styles.css'
-import { WalletProvider } from './providers/wallet-provider'
-import { ToastProvider } from './providers/toast-provider'
+import { WalletContextProvider } from './context/WalletContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,10 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`!bg-black ${inter.className}`}>
-        <WalletProvider>
-          <ToastProvider />
+        <WalletContextProvider>
           {children}
-        </WalletProvider>
+        </WalletContextProvider>
       </body>
     </html>
   )
