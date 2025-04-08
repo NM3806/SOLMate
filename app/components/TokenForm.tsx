@@ -5,12 +5,26 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { createAndMintSPLToken } from "@/utils/solana";
 import TransactionStatus from "./TransactionStatus";
 
+interface MintedToken {
+    name: string;
+    symbol: string;
+    amount: number;
+    decimals: number;
+    mint: string;
+    ata: string;
+    signature: string;
+}
+
 export default function TokenForm() {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
 
+    const [name, setName] = useState('');
+    const [symbol, setSymbol] = useState('');
     const [amount, setAmount] = useState('');
-    const [mintAddress, setMintAddress] = useState('');
+    const [decimals, setDecimals] = useState('0');
+    const [mintedTokens, setMintedTokens] = useState<MintedToken[]>([]);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -22,8 +36,8 @@ export default function TokenForm() {
             return;
         }
 
-        if (!amount || isNaN(Number(amount))) {
-            setError('Please enter a valid amount.');
+        if (!amount || isNaN(Number(amount)) || !name || !symbol) {
+            setError('Please fill in fields correctly.');
             return;
         }
 
@@ -34,12 +48,24 @@ export default function TokenForm() {
             const result = await createAndMintSPLToken({
                 connection,
                 walletPublicKey: publicKey,
+                name,
+                symbol,
                 amount: Number(amount),
-                decimals: 0
+                decimals: Number(decimals)
             });
 
 
-            setMintAddress(result.mint.toBase58());
+            setMintedTokens(prev => [
+                ...prev, {
+                    name,
+                    symbol,
+                    amount: Number(amount),
+                    decimals: Number(decimals),
+                    mint: result.mint.toBase58(),
+                    ata: result.ata.toBase58(),
+                    signature: result.signature
+                }
+            ]);
         } catch (err: any) {
             console.error(err);
             setError('Failed to create/mint token.');
@@ -53,11 +79,35 @@ export default function TokenForm() {
             <h2 className="text-xl font-bold text-center">Create & Mint Token</h2>
 
             <input
+                type="text"
+                placeholder="Token Name"
+                className="w-full p-2 border border-gray-300 rounded-lg"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+            />
+
+            <input
+                type="text"
+                placeholder="Token Symbol"
+                className="w-full p-2 border border-gray-300 rounded-lg"
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value)}
+            />
+
+            <input
                 type="number"
                 placeholder="Token Amount"
                 className="w-full p-2 border border-gray-300 rounded-lg"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+            />
+
+            <input
+                type="number"
+                placeholder="Decimals (default 0)"
+                className="w-full p-2 border border-gray-300 rounded-lg"
+                value={decimals}
+                onChange={(e) => setDecimals(e.target.value)}
             />
 
             <button
@@ -69,18 +119,20 @@ export default function TokenForm() {
             </button>
 
             <TransactionStatus status={
-                loading ? 'loading' : error ? 'error' : mintAddress ? 'success' : 'idle'
-            } message={error || (mintAddress && 'Minted successfully!')} />
+                loading ? 'loading' : error ? 'error' : mintedTokens.length > 0 ? 'success' : 'idle'
+            } message={error || (mintedTokens.length > 0 ? 'Minted successfully!' : undefined)} />
 
-            {mintAddress && (
-                <p className="text-green-600 text-sm break-all">
-                    Minted! Mint Address: {mintAddress}
-                </p>
-            )}
-
-            {error && (
-                <p className="text-red-500 text-sm">{error}</p>
-            )}
+            {mintedTokens.map((token, i) => (
+                <div key={i} className="p-2 border border-green-400 bg-green-50 rounded-lg text-sm space-y-1">
+                    <p>
+                        <strong>{token.name}</strong> (${token.symbol})
+                    </p>
+                    <p>Amount: {token.amount} | Decimals: {token.decimals}</p>
+                    <p>Mint Address: <span className="break-all">{token.mint}</span></p>
+                    <p>ATA: <span className="break-all">{token.ata}</span></p>
+                    <p>Signature: <span className="break-all">{token.signature}</span></p>
+                </div>
+            ))};
         </form>
     );
 }
