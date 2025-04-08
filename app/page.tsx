@@ -3,6 +3,7 @@
 import WalletButton from './components/WalletButton';
 import TokenForm from './components/TokenForm';
 import TokenList from './components/TokenList';
+import TokenManager from './components/TokenManager';
 
 export default function Home() {
   return (
@@ -11,10 +12,7 @@ export default function Home() {
         <h1 className="text-2xl font-bold text-center">Solana Token Minter</h1>
 
         <WalletButton />
-
-        <TokenForm />
-
-        <TokenList />
+        <TokenManager/>
       </div>
     </main>
   );

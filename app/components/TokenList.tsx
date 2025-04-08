@@ -5,14 +5,10 @@ import { useState } from "react";
 interface Token {
     mint: string;
     amount: number;
+    decimals: number;
 }
 
-export default function TokenList() {
-    const [tokens, setTokens] = useState<Token[]>([]);
-
-    const addToken = (mint: string, amount: number) => {
-        setTokens((prev) => [...prev, {mint, amount}]);
-    };
+export default function TokenList({ tokens }: { tokens: { mint: string, amount: number, decimals: number }[] }) {
 
     return (
         <div className="p-4 mt-6 max-w-md mx-auto bg-white rounded-xl shadow">
@@ -28,7 +24,7 @@ export default function TokenList() {
                                 Mint: {token.mint}
                             </span>
                             <span className="text-xs text-gray-400">
-                                Amount: {token.amount}
+                                Amount: {(token.amount / Math.pow(10, token.decimals)).toFixed(token.decimals)}
                             </span>
                         </li>
                     ))}

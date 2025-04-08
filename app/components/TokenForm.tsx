@@ -15,7 +15,13 @@ interface MintedToken {
     signature: string;
 }
 
-export default function TokenForm() {
+export default function TokenForm({
+    mintedTokens,
+    setMintedTokens
+} : {
+    mintedTokens: MintedToken[],
+    setMintedTokens: React.Dispatch<React.SetStateAction<MintedToken[]>>
+}) {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
 
@@ -23,7 +29,6 @@ export default function TokenForm() {
     const [symbol, setSymbol] = useState('');
     const [amount, setAmount] = useState('');
     const [decimals, setDecimals] = useState('0');
-    const [mintedTokens, setMintedTokens] = useState<MintedToken[]>([]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -127,7 +132,7 @@ export default function TokenForm() {
                     <p>
                         <strong>{token.name}</strong> (${token.symbol})
                     </p>
-                    <p>Amount: {token.amount} | Decimals: {token.decimals}</p>
+                    <p>Amount: {(token.amount / Math.pow(10, token.decimals)).toFixed(token.decimals)}</p>
                     <p>Mint Address: <span className="break-all">{token.mint}</span></p>
                     <p>ATA: <span className="break-all">{token.ata}</span></p>
                     <p>Signature: <span className="break-all">{token.signature}</span></p>
