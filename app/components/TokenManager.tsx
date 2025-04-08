@@ -1,16 +1,26 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import TokenForm from "./TokenForm";
 import TokenList from "./TokenList";
 
-export default function TokenManager() {
-    const [mintedTokens, setMintedTokens] = useState([]);
+interface MintedToken {
+  name: string;
+  symbol: string;
+  amount: number;
+  decimals: number;
+  mint: string;
+  ata: string;
+  signature: string;
+}
 
-    return (
-        <>
-            <TokenForm mintedTokens={mintedTokens} setMintedTokens={setMintedTokens}/>
-            <TokenList tokens={mintedTokens}/>
-        </>
-    );
+export default function TokenManager() {
+  const [mintedTokens, setMintedTokens] = useState<MintedToken[]>([]);
+
+  return (
+    <>
+      <TokenForm mintedTokens={mintedTokens} setMintedTokens={setMintedTokens} />
+      <TokenList tokens={mintedTokens} />
+    </>
+  );
 }

@@ -18,7 +18,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`!bg-black ${inter.className}`}>
+      <body className={`${inter.className} bg-black text-white`}>
+
         <WalletContextProvider>
           {children}
         </WalletContextProvider>

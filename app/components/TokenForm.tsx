@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { createAndMintSPLToken } from "@/utils/solana";
 import TransactionStatus from "./TransactionStatus";
+import { createAndMintSPLToken } from "@/utils/solana";
+
 
 interface MintedToken {
     name: string;
@@ -18,7 +19,7 @@ interface MintedToken {
 export default function TokenForm({
     mintedTokens,
     setMintedTokens
-} : {
+}: {
     mintedTokens: MintedToken[],
     setMintedTokens: React.Dispatch<React.SetStateAction<MintedToken[]>>
 }) {
@@ -31,52 +32,45 @@ export default function TokenForm({
     const [decimals, setDecimals] = useState('0');
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!publicKey) {
-            setError('Connect your wallet first!');
-            return;
-        }
-
-        if (!amount || isNaN(Number(amount)) || !name || !symbol) {
-            setError('Please fill in fields correctly.');
-            return;
-        }
+        if (!amount || isNaN(Number(amount)) || !name || !symbol) return;
 
         try {
             setLoading(true);
-            setError('');
+            setError(null);
 
-            const result = await createAndMintSPLToken({
+            const rawToken = await createAndMintSPLToken({
                 connection,
-                walletPublicKey: publicKey,
+                walletPublicKey: publicKey!,
                 name,
                 symbol,
                 amount: Number(amount),
-                decimals: Number(decimals)
-            });
+                decimals: Number(decimals),
+            });                     
 
+            const token: MintedToken = {
+                name,
+                symbol,
+                amount: Number(amount),
+                decimals: Number(decimals),
+                mint: rawToken.mint.toBase58(),
+                ata: rawToken.ata.toBase58(),
+                signature: rawToken.signature,
+            };
 
-            setMintedTokens(prev => [
-                ...prev, {
-                    name,
-                    symbol,
-                    amount: Number(amount),
-                    decimals: Number(decimals),
-                    mint: result.mint.toBase58(),
-                    ata: result.ata.toBase58(),
-                    signature: result.signature
-                }
-            ]);
+            setMintedTokens((prev) => [token, ...prev]);
+            
         } catch (err: any) {
-            console.error(err);
-            setError('Failed to create/mint token.');
+            setError(err.message || 'Something went wrong');
         } finally {
             setLoading(false);
         }
+
     };
 
     return (
@@ -127,17 +121,7 @@ export default function TokenForm({
                 loading ? 'loading' : error ? 'error' : mintedTokens.length > 0 ? 'success' : 'idle'
             } message={error || (mintedTokens.length > 0 ? 'Minted successfully!' : undefined)} />
 
-            {mintedTokens.map((token, i) => (
-                <div key={i} className="p-2 border border-green-400 bg-green-50 rounded-lg text-sm space-y-1">
-                    <p>
-                        <strong>{token.name}</strong> (${token.symbol})
-                    </p>
-                    <p>Amount: {(token.amount / Math.pow(10, token.decimals)).toFixed(token.decimals)}</p>
-                    <p>Mint Address: <span className="break-all">{token.mint}</span></p>
-                    <p>ATA: <span className="break-all">{token.ata}</span></p>
-                    <p>Signature: <span className="break-all">{token.signature}</span></p>
-                </div>
-            ))};
+
         </form>
     );
 }
