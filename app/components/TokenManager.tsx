@@ -3,6 +3,7 @@
 import { useState } from "react";
 import TokenForm from "./TokenForm";
 import TokenList from "./TokenList";
+import SendTokenForm from "./SendTokenForm";
 
 interface MintedToken {
   name: string;
@@ -21,6 +22,8 @@ export default function TokenManager() {
     <>
       <TokenForm mintedTokens={mintedTokens} setMintedTokens={setMintedTokens} />
       <TokenList tokens={mintedTokens} />
+
+      <SendTokenForm mintedTokens={mintedTokens}/>
     </>
   );
 }

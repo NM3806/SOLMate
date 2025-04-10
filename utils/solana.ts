@@ -21,7 +21,6 @@ import {
   DataV2
 } from '@metaplex-foundation/mpl-token-metadata';
 
-
 // Main function to create & mint a new SPL token
 export const createAndMintSPLToken = async ({
   connection,
