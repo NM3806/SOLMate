@@ -147,7 +147,7 @@ export default function SendTokenForm({ mintedTokens }: { mintedTokens: MintedTo
       />
 
       <input
-        type="number"
+        type="number" min="1" step="1"
         placeholder="Amount"
         className="w-full p-3 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 transition-colors"
         value={amountToSend}

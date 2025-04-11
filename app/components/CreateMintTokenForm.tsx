@@ -100,7 +100,7 @@ export default function TokenForm({
       />
 
       <input
-        type="number"
+        type="number" min="1" step="1"
         placeholder="Token Amount"
         className="w-full p-3 border rounded-lg border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500"
         value={amount}
@@ -108,7 +108,7 @@ export default function TokenForm({
       />
 
       <input
-        type="number"
+        type="number" min="0" step="1"
         placeholder="Decimals (default 0)"
         className="w-full p-3 border rounded-lg border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500"
         value={decimals}

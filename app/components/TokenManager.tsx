@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import TokenForm from "./TokenForm";
+import TokenForm from "./CreateMintTokenForm";
 import TokenList from "./TokenList";
 import SendTokenForm from "./SendTokenForm";
 import { toast } from "sonner";

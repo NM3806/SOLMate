@@ -1,10 +1,8 @@
-import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { Toaster } from 'sonner';
 import { WalletContextProvider } from './context/WalletContext';
-import Head from 'next/head';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
