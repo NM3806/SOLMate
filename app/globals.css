@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-/* :root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root {
+  --font-sans: 'Inter', sans-serif;
+  --color-primary: #7c3aed;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -13,7 +13,5 @@
 } */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-white font-sans transition-colors duration-300;
 }

@@ -3,123 +3,125 @@
 import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { createAndMintSPLToken } from "@/utils/solana";
-import {toast} from 'sonner';
+import { toast } from "sonner";
 
 interface MintedToken {
-    name: string;
-    symbol: string;
-    amount: number;
-    decimals: number;
-    mint: string;
-    ata: string;
-    signature: string;
+  name: string;
+  symbol: string;
+  amount: number;
+  decimals: number;
+  mint: string;
+  ata: string;
+  signature: string;
 }
 
 export default function TokenForm({
-    mintedTokens,
-    setMintedTokens
+  mintedTokens,
+  setMintedTokens,
 }: {
-    mintedTokens: MintedToken[],
-    setMintedTokens: React.Dispatch<React.SetStateAction<MintedToken[]>>
+  mintedTokens: MintedToken[];
+  setMintedTokens: React.Dispatch<React.SetStateAction<MintedToken[]>>;
 }) {
-    const { connection } = useConnection();
-    const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
 
-    const [name, setName] = useState('');
-    const [symbol, setSymbol] = useState('');
-    const [amount, setAmount] = useState('');
-    const [decimals, setDecimals] = useState('0');
+  const [name, setName] = useState("");
+  const [symbol, setSymbol] = useState("");
+  const [amount, setAmount] = useState("");
+  const [decimals, setDecimals] = useState("0");
+  const [loading, setLoading] = useState(false);
 
-    const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-    
-        if (!amount || isNaN(Number(amount)) || !name || !symbol) {
-            toast.error("All fields are required");
-            return;
-        }
-    
-        try {
-            setLoading(true);
-            toast.loading("Minting token...");
-    
-            const rawToken = await createAndMintSPLToken({
-                connection,
-                walletPublicKey: publicKey!,
-                name,
-                symbol,
-                amount: Number(amount),
-                decimals: Number(decimals),
-            });
-    
-            const token: MintedToken = {
-                name,
-                symbol,
-                amount: Number(amount),
-                decimals: Number(decimals),
-                mint: rawToken.mint.toBase58(),
-                ata: rawToken.ata.toBase58(),
-                signature: rawToken.signature,
-            };
-    
-            setMintedTokens((prev) => [token, ...prev]);
-            
-            toast.dismiss();
-            toast.success("Token minted successfully!");
-        } catch (err: any) {
-            toast.dismiss();
-            toast.error(err.message || "Minting failed");
-        } finally {
-            setLoading(false);
-            toast.dismiss(); 
-        }
-    };    
+    if (!amount || isNaN(Number(amount)) || !name || !symbol) {
+      toast.error("All fields are required");
+      return;
+    }
 
-    return (
-        <form onSubmit={handleSubmit} className="p-4 max-w-md mx-auto space-y-4 bg-white rounded-2xl shadow-md">
-            <h2 className="text-xl font-bold text-center">Create & Mint Token</h2>
+    try {
+      setLoading(true);
+      toast.loading("Minting token...");
 
-            <input
-                type="text"
-                placeholder="Token Name"
-                className="w-full p-2 border border-gray-300 rounded-lg"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-            />
+      const rawToken = await createAndMintSPLToken({
+        connection,
+        walletPublicKey: publicKey!,
+        name,
+        symbol,
+        amount: Number(amount),
+        decimals: Number(decimals),
+      });
 
-            <input
-                type="text"
-                placeholder="Token Symbol"
-                className="w-full p-2 border border-gray-300 rounded-lg"
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
-            />
+      const token: MintedToken = {
+        name,
+        symbol,
+        amount: Number(amount),
+        decimals: Number(decimals),
+        mint: rawToken.mint.toBase58(),
+        ata: rawToken.ata.toBase58(),
+        signature: rawToken.signature,
+      };
 
-            <input
-                type="number"
-                placeholder="Token Amount"
-                className="w-full p-2 border border-gray-300 rounded-lg"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-            />
+      setMintedTokens((prev) => [token, ...prev]);
 
-            <input
-                type="number"
-                placeholder="Decimals (default 0)"
-                className="w-full p-2 border border-gray-300 rounded-lg"
-                value={decimals}
-                onChange={(e) => setDecimals(e.target.value)}
-            />
+      toast.dismiss();
+      toast.success("Token minted successfully!");
+    } catch (err: any) {
+      toast.dismiss();
+      toast.error(err.message || "Minting failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700"
-            >
-                {loading ? 'Processing...' : 'Create & Mint'}
-            </button>
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-md space-y-4 transition-all"
+    >
+      <h2 className="text-lg font-semibold text-purple-600 dark:text-purple-400 text-center">
+        Create & Mint Token
+      </h2>
 
-        </form>
-    );
+      <input
+        type="text"
+        placeholder="Token Name"
+        className="w-full p-3 border rounded-lg border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <input
+        type="text"
+        placeholder="Token Symbol"
+        className="w-full p-3 border rounded-lg border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500"
+        value={symbol}
+        onChange={(e) => setSymbol(e.target.value)}
+      />
+
+      <input
+        type="number"
+        placeholder="Token Amount"
+        className="w-full p-3 border rounded-lg border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+      />
+
+      <input
+        type="number"
+        placeholder="Decimals (default 0)"
+        className="w-full p-3 border rounded-lg border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-gray-400 dark:placeholder-zinc-500"
+        value={decimals}
+        onChange={(e) => setDecimals(e.target.value)}
+      />
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? "Processing..." : "Create & Mint"}
+      </button>
+    </form>
+  );
 }
