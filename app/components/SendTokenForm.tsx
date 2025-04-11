@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { sendSPLToken } from "@/utils/sendSPLToken";
+import { fetchUserTokens } from "@/utils/fetchUserTokens";
+import { fetchTokenMetadata } from "@/utils/fetchTokenMetadata";
+import { toast } from 'sonner';
 
 interface MintedToken {
     name: string;
@@ -15,6 +18,12 @@ interface MintedToken {
     signature: string;
 }
 
+interface UserToken {
+    mint: string;
+    amount: number;
+    decimals: number;
+}
+
 export default function SendTokenForm({ mintedTokens }: { mintedTokens: MintedToken[] }) {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
@@ -24,21 +33,35 @@ export default function SendTokenForm({ mintedTokens }: { mintedTokens: MintedTo
     const [amountToSend, setAmountToSend] = useState('');
     const [txSig, setTxSig] = useState('');
     const [error, setError] = useState('');
+    const [isSending, setIsSending] = useState(false);
+
+    const [availableTokens, setAvailableTokens] = useState<MintedToken[]>([]);
 
     const handleSend = async () => {
         try {
             setError('');
+            setTxSig('');
+            setIsSending(true);
+
             if (!publicKey || !recipient || !selectedMint || !amountToSend) {
-                setError("All fields are required");
+                const msg = 'All fields are required';
+                setError(msg);
+                toast.error(msg);
+
+                setIsSending(false);
                 return;
             }
 
             const recipientKey = new PublicKey(recipient);
             const mintKey = new PublicKey(selectedMint);
 
-            const selectedToken = mintedTokens.find(token => token.mint === selectedMint);
+            const selectedToken = availableTokens.find(token => token.mint === selectedMint);
             if (!selectedToken) {
-                setError("Selected token not found");
+                const msg = "Selected token not found in wallet";
+                setError(msg);
+
+                toast.error(msg);
+                setIsSending(false);
                 return;
             }
 
@@ -48,21 +71,59 @@ export default function SendTokenForm({ mintedTokens }: { mintedTokens: MintedTo
                 recipient: recipientKey,
                 mint: mintKey,
                 amount: Number(amountToSend),
-                decimals: selectedToken.decimals
+                decimals: selectedToken.decimals,
             });
 
             const signature = await sendTransaction(tx, connection);
             const latestBlockhash = await connection.getLatestBlockhash();
             await connection.confirmTransaction(
-                {signature , ...latestBlockhash},
+                { signature, ...latestBlockhash },
                 "confirmed"
             );
-            setTxSig(signature);
 
+            setTxSig(signature);
+            toast.success("Tokens sent successfully!")
         } catch (err: any) {
-            setError(err.message || "Transaction Failed");
+            const msg = err.message || "Transaction Failed";
+            setError(msg);
+            toast.error(msg);
+        } finally {
+            setIsSending(false);
+            toast.dismiss();
         }
     };
+
+    useEffect(() => {
+        if (!publicKey) return;
+
+        (async () => {
+            const usertokens = await fetchUserTokens(connection, publicKey);
+
+            const merged = await Promise.all(usertokens.map(async (ut) => {
+                const meta = mintedTokens.find(mt => mt.mint === ut.mint);
+                let name = meta?.name ?? '';
+                let symbol = meta?.symbol ?? '';
+
+                if (!name || !symbol) {
+                    const fetchMeta = await fetchTokenMetadata(connection, ut.mint);
+                    name = fetchMeta.name;
+                    symbol = fetchMeta.symbol;
+                }
+
+                return {
+                    name,
+                    symbol,
+                    amount: ut.amount,
+                    decimals: ut.decimals,
+                    mint: ut.mint,
+                    ata: '',
+                    signature: '',
+                };
+            }));
+
+            setAvailableTokens(merged);
+        })();
+    }, [connection, publicKey]);
 
     return (
         <div className="p-4 mt-8 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
@@ -74,11 +135,13 @@ export default function SendTokenForm({ mintedTokens }: { mintedTokens: MintedTo
                 onChange={(e) => setSelectedMint(e.target.value)}
             >
                 <option value="">Select Token</option>
-                {mintedTokens.map((token) => (
-                    <option key={token.mint} value={token.mint}>
-                        {token.name} ({token.symbol})
-                    </option>
-                ))}
+                {[...availableTokens]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((token) => (
+                        <option key={token.mint} value={token.mint}>
+                            {token.name} (Bal: {token.amount})
+                        </option>
+                    ))}
             </select>
 
             <input
@@ -97,9 +160,11 @@ export default function SendTokenForm({ mintedTokens }: { mintedTokens: MintedTo
             />
             <button
                 onClick={handleSend}
-                className="w-full bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700"
+                disabled={isSending}
+                className={`w-full p-2 rounded-lg text-white ${isSending ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
+                    }`}
             >
-                Send Tokens
+                {isSending ? "Sending..." : "Send Tokens"}
             </button>
 
             {txSig && <p className="text-green-600 break-all">Tx Signature: {txSig}</p>}

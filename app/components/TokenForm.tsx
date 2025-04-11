@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import TransactionStatus from "./TransactionStatus";
 import { createAndMintSPLToken } from "@/utils/solana";
-
+import {toast} from 'sonner';
 
 interface MintedToken {
     name: string;
@@ -32,18 +31,19 @@ export default function TokenForm({
     const [decimals, setDecimals] = useState('0');
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!amount || isNaN(Number(amount)) || !name || !symbol) return;
-
+    
+        if (!amount || isNaN(Number(amount)) || !name || !symbol) {
+            toast.error("All fields are required");
+            return;
+        }
+    
         try {
             setLoading(true);
-            setError(null);
-
+            toast.loading("Minting token...");
+    
             const rawToken = await createAndMintSPLToken({
                 connection,
                 walletPublicKey: publicKey!,
@@ -51,8 +51,8 @@ export default function TokenForm({
                 symbol,
                 amount: Number(amount),
                 decimals: Number(decimals),
-            });                     
-
+            });
+    
             const token: MintedToken = {
                 name,
                 symbol,
@@ -62,16 +62,19 @@ export default function TokenForm({
                 ata: rawToken.ata.toBase58(),
                 signature: rawToken.signature,
             };
-
+    
             setMintedTokens((prev) => [token, ...prev]);
             
+            toast.dismiss();
+            toast.success("Token minted successfully!");
         } catch (err: any) {
-            setError(err.message || 'Something went wrong');
+            toast.dismiss();
+            toast.error(err.message || "Minting failed");
         } finally {
             setLoading(false);
+            toast.dismiss(); 
         }
-
-    };
+    };    
 
     return (
         <form onSubmit={handleSubmit} className="p-4 max-w-md mx-auto space-y-4 bg-white rounded-2xl shadow-md">
@@ -116,11 +119,6 @@ export default function TokenForm({
             >
                 {loading ? 'Processing...' : 'Create & Mint'}
             </button>
-
-            <TransactionStatus status={
-                loading ? 'loading' : error ? 'error' : mintedTokens.length > 0 ? 'success' : 'idle'
-            } message={error || (mintedTokens.length > 0 ? 'Minted successfully!' : undefined)} />
-
 
         </form>
     );
