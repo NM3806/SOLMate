@@ -4,8 +4,8 @@ import { PublicKey } from "@solana/web3.js";
 import { sendSPLToken } from "@/utils/sendSPLToken";
 import { fetchUserTokens } from "@/utils/fetchUserTokens";
 import { fetchTokenMetadata } from "@/utils/fetchTokenMetadata";
-import { toast } from "sonner";
 import { MintedToken } from "../types/token";
+import { useToaster } from './useToaster';
 
 export function useSendTokenForm(mintedTokens: MintedToken[]) {
   const { connection } = useConnection();
@@ -19,32 +19,36 @@ export function useSendTokenForm(mintedTokens: MintedToken[]) {
   const [isSending, setIsSending] = useState(false);
   const [availableTokens, setAvailableTokens] = useState<MintedToken[]>([]);
 
+  const { toastLoading, toastSuccess, toastError, toastDismiss } = useToaster();
+
   const handleSend = async () => {
     try {
       setError("");
       setTxSig("");
       setIsSending(true);
-
+  
       if (!publicKey || !recipient || !selectedMint || !amountToSend) {
         const msg = "All fields are required";
         setError(msg);
-        toast.error(msg);
+        toastError(msg);
         setIsSending(false);
         return;
       }
-
+  
       const recipientKey = new PublicKey(recipient);
       const mintKey = new PublicKey(selectedMint);
-
+  
       const selectedToken = availableTokens.find((token) => token.mint === selectedMint);
       if (!selectedToken) {
         const msg = "Selected token not found in wallet";
         setError(msg);
-        toast.error(msg);
+        toastError(msg);
         setIsSending(false);
         return;
       }
-
+  
+      const toastId = toastLoading("Sending tokens...");
+  
       const tx = await sendSPLToken({
         connection,
         sender: publicKey,
@@ -53,22 +57,26 @@ export function useSendTokenForm(mintedTokens: MintedToken[]) {
         amount: Number(amountToSend),
         decimals: selectedToken.decimals,
       });
-
+  
       const signature = await sendTransaction(tx, connection);
       const latestBlockhash = await connection.getLatestBlockhash();
       await connection.confirmTransaction({ signature, ...latestBlockhash }, "confirmed");
-
+  
       setTxSig(signature);
-      toast.success("Tokens sent successfully!");
+  
+      toastDismiss();
+      toastSuccess("Tokens sent successfully!");
     } catch (err: any) {
       const msg = err.message || "Transaction Failed";
       setError(msg);
-      toast.error(msg);
+      toastDismiss();
+      toastError(msg);
     } finally {
       setIsSending(false);
-      toast.dismiss();
+      toastDismiss();
     }
   };
+  
 
   useEffect(() => {
     if (!publicKey) return;

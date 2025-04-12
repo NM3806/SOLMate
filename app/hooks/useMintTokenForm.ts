@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { toast } from "sonner";
 import { createAndMintSPLToken } from "@/utils/solana";
 import { MintedToken } from "../types/token";
+import { useToaster } from "./useToaster";
 
 export function useMintTokenForm(setMintedTokens: React.Dispatch<React.SetStateAction<MintedToken[]>>) {
   const { connection } = useConnection();
@@ -14,18 +14,21 @@ export function useMintTokenForm(setMintedTokens: React.Dispatch<React.SetStateA
   const [decimals, setDecimals] = useState("0");
   const [loading, setLoading] = useState(false);
 
+  const { toastLoading, toastSuccess, toastError, toastDismiss } = useToaster();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0 || !name || !symbol) {
-      toast.error("All fields are required and amount must be positive");
+      toastError("All fields are required and amount must be positive");
       return;
     }
-
+  
+    const loadingToastId = toastLoading("Minting token...");
+  
     try {
       setLoading(true);
-      toast.loading("Minting token...");
-
+  
       const rawToken = await createAndMintSPLToken({
         connection,
         walletPublicKey: publicKey!,
@@ -34,7 +37,7 @@ export function useMintTokenForm(setMintedTokens: React.Dispatch<React.SetStateA
         amount: Number(amount),
         decimals: Number(decimals),
       });
-
+  
       const token: MintedToken = {
         name,
         symbol,
@@ -44,17 +47,18 @@ export function useMintTokenForm(setMintedTokens: React.Dispatch<React.SetStateA
         ata: rawToken.ata.toBase58(),
         signature: rawToken.signature,
       };
-
+  
       setMintedTokens((prev) => [token, ...prev]);
-
-      toast.success("Token minted successfully!");
+  
+      toastDismiss();
+      toastSuccess(`${symbol} token created successfully!`);
     } catch (err: any) {
-      toast.error(err.message || "Minting failed");
+      toastDismiss();
+      toastError("Minting failed: " + err.message);
     } finally {
-      toast.dismiss();
       setLoading(false);
     }
-  };
+  };  
 
   return {
     name, setName,

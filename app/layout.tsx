@@ -45,7 +45,21 @@ export default function RootLayout({
       >
         <WalletContextProvider>
           <main className="max-w-2xl mx-auto px-4 py-6">{children}</main>
-          <Toaster position="top-center" richColors />
+          <Toaster
+            position="top-center"
+            richColors
+            closeButton
+            toastOptions={{
+              duration: 3000,
+              classNames: {
+                toast: '!bg-background !text-foreground !border',
+                title: '!font-semibold',
+                description: '!text-sm !opacity-90',
+                actionButton: '!bg-purple-600 !text-white',
+                closeButton: '!text-foreground/50',
+              }
+            }}
+          />
         </WalletContextProvider>
       </body>
     </html>

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import TokenForm from "./CreateMintTokenForm";
 import TokenList from "./TokenList";
 import SendTokenForm from "./SendTokenForm";
-import { toast } from "sonner";
 
 interface MintedToken {
   name: string;
@@ -23,7 +22,7 @@ export default function TokenManager() {
   useEffect(() => {
     if (mintedTokens.length > prevCount) {
       const latest = mintedTokens[0];
-      toast.success(`${latest.symbol} token created successfully!`)
+
       setPrevCount(mintedTokens.length);
     }
   })
