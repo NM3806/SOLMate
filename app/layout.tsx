@@ -3,6 +3,7 @@ import './globals.css';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { Toaster } from 'sonner';
 import { WalletContextProvider } from './context/WalletContext';
+import Footer from './components/Footer';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
@@ -45,6 +46,7 @@ export default function RootLayout({
       >
         <WalletContextProvider>
           <main className="max-w-2xl mx-auto px-4 py-6">{children}</main>
+          <Footer />
           <Toaster
             position="top-center"
             richColors
