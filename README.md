@@ -3,7 +3,7 @@
 
 SOLMate is a modern web interface built with Next.js, Tailwind CSS, and Solana Web3.js that allows users to create, mint, send, and view SPL tokens on the Solana Devnet. It integrates seamlessly with Phantom Wallet and provides real-time feedback and metadata integration via Metaplex.
 
-
+![image](https://github.com/user-attachments/assets/821b21c2-5994-4e27-85b0-31ad20787516)
 
 > Live at: [solmate-nm3806.vercel.app](https://solmate-nm3806.vercel.app)
 
