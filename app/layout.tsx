@@ -14,6 +14,9 @@ export const metadata = {
   },
   description: "Create, mint, and send Solana SPL tokens with ease.",
   keywords: ["Solana", "SPL", "token", "wallet", "mint", "send", "crypto"],
+  icons: {
+    icon: "/favicon.ico"
+  },
   openGraph: {
     title: "SOLMate",
     description: "Your SPL Token Companion on Solana.",
